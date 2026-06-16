@@ -12,7 +12,6 @@ These are installed as global skills under `~/.claude/skills/`. This repo is tha
 | [`eval-spec`](eval-spec/SKILL.md) | After MVP scope locks, before/alongside architecture | Turns "what good looks like" into measurable pass/fail contracts. Classifies each feature as deterministic test vs. probabilistic eval vs. guardrail; builds gold datasets; sets ship/no-ship thresholds. |
 | [`architecture-checkpoint`](architecture-checkpoint/SKILL.md) | Before proposing a full system design or major change | Validates architecture against PM constraints: scalability, DB/cache strategy, error handling, observability, cost, explicit trade-offs. |
 | [`api-contract-definition`](api-contract-definition/SKILL.md) | Designing service-to-service or public APIs | Defines API contracts (OpenAPI/gRPC) before implementation — versioning, pagination, error handling, schema consistency. |
-| [`eval-integration-gate`](eval-integration-gate/SKILL.md) | Designing RAG / agents / agentic systems | Ensures eval loops are embedded *in* the architecture, not bolted on afterward. |
 | [`security-baseline`](security-baseline/SKILL.md) | Any new service, API, or auth flow | Minimum security bar: encryption, secrets management, PII handling, auth/authz, compliance scope, dependency CVEs. |
 | [`deploy-gate`](deploy-gate/SKILL.md) | Before any deploy / migration / public URL goes live | Runtime safety gate on the *built artifact*: re-scans for leaked secrets/PII/public endpoints, re-checks deps for CVEs, requires explicit human approval for prod deploy and schema migration. |
 
@@ -21,8 +20,10 @@ These are installed as global skills under `~/.claude/skills/`. This repo is tha
 ```
 brainstorm ──▶ eval-spec ──▶ architecture-checkpoint ──▶ ...build... ──▶ security-baseline ──▶ deploy-gate
                                     │
-                 api-contract-definition + eval-integration-gate (for APIs / AI-native systems)
+                       api-contract-definition (for APIs)
 ```
+
+`eval-spec` carries the AI-native eval loop end to end: it now specifies the runtime eval service/feedback/dashboard (Step 7), and `architecture-checkpoint` verifies that loop is built in as a first-class component.
 
 Each gate bounces cheaply back to the previous one when something isn't clear enough: if you can't write the eval, the problem isn't understood well enough to build.
 
@@ -31,15 +32,15 @@ Each gate bounces cheaply back to the previous one when something isn't clear en
 ```
 <skill-name>/
   SKILL.md            # frontmatter (name, description) + instructions
-  references/         # supporting docs the skill pulls in (e.g. brainstorm/references/pm-frameworks.md)
-<skill-name>.skill    # packaged/installable archive of each skill
+  references/         # supporting docs the skill pulls in
+                      #   brainstorm/references/pm-frameworks.md, eval-spec/references/eval-craft.md
 ```
 
 ## Install
 
 ### As a plugin (recommended — to share)
 
-This repo is a Claude Code plugin marketplace. Anyone can install all seven skills in two commands:
+This repo is a Claude Code plugin marketplace. Anyone can install all six skills in two commands:
 
 ```
 /plugin marketplace add deepikabg/claude-skills
@@ -55,7 +56,3 @@ git clone git@github.com:deepikabg/claude-skills.git ~/.claude/skills
 ```
 
 Each skill directory is auto-discovered by Claude Code from `~/.claude/skills/`.
-
-### Single skill
-
-Install one packaged skill via its `.skill` archive (e.g. `brainstorm.skill`).
