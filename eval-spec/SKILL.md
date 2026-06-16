@@ -1,12 +1,12 @@
 ---
 name: eval-spec
 description: |
-  Define a rigorous, per-feature/per-dimension evaluation spec BEFORE building — the principal-PM deliverable that turns "what good looks like" into measurable, testable contracts. Use immediately after the MVP scope is locked (after brainstorm, before or alongside architecture) for any AI-native or high-stakes build. This skill classifies every feature/dimension as deterministic test vs. probabilistic eval vs. guardrail, runs error-analysis-first taxonomy design, builds gold-standard datasets, writes binary pass/fail criteria with rubrics for subjective dimensions, defines LLM-as-judge / trajectory evaluation for agents, slices evals by user segment to catch bias, and sets ship/no-ship thresholds. Triggers on "write evals", "what should we measure", "how do we know it works", "eval set", "test criteria", "before we build", or when a build is about to start without defined success criteria. If you can't write the eval, the problem isn't understood well enough to build.
+  Define a rigorous, per-feature/per-dimension evaluation spec BEFORE building — the deliverable that turns "what good looks like" into measurable, testable contracts. Use immediately after the MVP scope is locked (after brainstorm, before or alongside architecture) for any AI-native or high-stakes build. This skill classifies every feature/dimension as deterministic test vs. probabilistic eval vs. guardrail, runs error-analysis-first taxonomy design, builds gold-standard datasets, writes binary pass/fail criteria with rubrics for subjective dimensions, defines LLM-as-judge / trajectory evaluation for agents, slices evals by user segment to catch bias, and sets ship/no-ship thresholds. Triggers on "write evals", "what should we measure", "how do we know it works", "eval set", "test criteria", "before we build", or when a build is about to start without defined success criteria. If you can't write the eval, the problem isn't understood well enough to build.
 ---
 
 # Eval Spec
 
-Evals are the product spec. This skill produces the eval set *before* the build, so the build has a measurable target instead of a vibe. Grounded in the user's AI-Native playbook + Google's Agent Quality framework + the Husain/Shankar error-analysis method (see `references/eval-craft.md`).
+Evals are the product spec. This skill produces the eval set *before* the build, so the build has a measurable target instead of a vibe. Grounded in an AI-native eval playbook + Google's Agent Quality framework + the Husain/Shankar error-analysis method (see `references/eval-craft.md`).
 
 ## Core stance
 

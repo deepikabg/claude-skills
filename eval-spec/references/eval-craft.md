@@ -1,6 +1,6 @@
 # Eval Craft Reference
 
-The full method behind the `eval-spec` skill. Read when a step needs depth. Sources: the user's AI-Native playbook, Google's Agent Quality framework, and the Husain/Shankar error-analysis method.
+The full method behind the `eval-spec` skill. Read when a step needs depth. Sources: an AI-native eval playbook, Google's Agent Quality framework, and the Husain/Shankar error-analysis method.
 
 ## 1. Error analysis (the most important activity)
 
