@@ -5,17 +5,26 @@ description: "Define API contracts (OpenAPI/gRPC) before implementation. Use whe
 
 # API Contract Definition
 
-## When to Trigger
+The contract is the cheapest place to get the API right. Once consumers integrate, the shape is frozen — a renamed field or an unversioned breaking change becomes everyone else's migration. This skill forces the decisions that are nearly free now and irreversible later: **versioning, error taxonomy, pagination, and backwards-compatibility promise** — agreed and validated against real scenarios *before* a line of implementation.
 
+## When to Trigger
 Before coding any API endpoint:
-- Public APIs (for external consumers)
+- Public APIs (external consumers)
 - Service-to-service APIs
 - Webhook specifications
 - Event schema definitions
 
-## What It Does
+## When NOT to Trigger
+- A single internal function call with no network boundary
+- A throwaway endpoint in a prototype you'll delete (note the contract is deferred)
+- A purely additive, non-breaking change to an endpoint already under contract (just extend the existing spec)
 
-Claude generates:
+## Scale to the build
+- **Public API / external consumers** → full spec, explicit versioning + deprecation policy, 5–10 scenarios, consumer testing guide.
+- **Internal service-to-service** → schema + error taxonomy + versioning; lighter on the deprecation ceremony if both sides ship together.
+- **Prototype** → sketch the resource shapes and the error envelope; skip formal versioning until it has a real consumer.
+
+## What It Produces
 1. OpenAPI spec (or gRPC proto)
 2. Versioning strategy
 3. Error taxonomy
@@ -25,45 +34,25 @@ Claude generates:
 ## Workflow
 
 ### Step 1: Gather Intent
-
-Claude asks:
 ```
 For this API, tell me:
 
-1. What's the primary use case?
-   - CRUD operations?
-   - Async job submission?
-   - Real-time streaming?
-   - File upload/download?
-
-2. Expected throughput?
-   - [req/sec at launch]
-   - [req/sec at scale]
-
-3. Backwards compatibility required?
-   - Yes (public API, external consumers)
-   - No (internal, can break)
-
-4. Consumer types?
-   - Web frontend?
-   - Mobile?
-   - Server-to-server?
-   - CLIs/scripts?
+1. Primary use case?  (CRUD / async job / real-time stream / file upload-download)
+2. Expected throughput?  ([req/sec at launch] → [req/sec at scale])
+3. Backwards compatibility required?  (Yes = public/external · No = internal, can break)
+4. Consumer types?  (web / mobile / server-to-server / CLIs/scripts)
 ```
 
-### Step 2: Claude Generates Spec
-
+### Step 2: Generate the Spec
 ```yaml
 openapi: 3.0.0
 info:
   title: [API Name]
   version: 1.0.0
   description: |
-    [Clear description of what this API does]
-    
+    [What this API does]
     Versioning: Semantic versioning (MAJOR.MINOR.PATCH)
     Deprecation policy: 6-month grace period before breaking changes
-    
 paths:
   /v1/[resource]:
     post:
@@ -86,24 +75,23 @@ paths:
               schema:
                 type: object
                 properties:
-                  error_code: string  # e.g., "INVALID_EMAIL"
-                  message: string     # e.g., "Email format invalid"
-                  details: object     # e.g., {"field": "email", "reason": "..."}
+                  error_code: { type: string }   # e.g., "INVALID_EMAIL"
+                  message:    { type: string }   # e.g., "Email format invalid"
+                  details:    { type: object }   # e.g., {"field": "email", "reason": "..."}
         429:
           description: Rate limited
           headers:
-            X-RateLimit-Remaining: integer
+            X-RateLimit-Remaining: { schema: { type: integer } }
 
 components:
   schemas:
     ErrorResponse:
       type: object
       properties:
-        error_code: string      # Machine-readable
-        message: string         # Human-readable
-        request_id: string      # For support tickets
-        timestamp: string       # ISO 8601
-
+        error_code: { type: string }   # Machine-readable
+        message:    { type: string }   # Human-readable
+        request_id: { type: string }   # For support tickets
+        timestamp:  { type: string }   # ISO 8601
   securitySchemes:
     apiKey:
       type: apiKey
@@ -115,31 +103,36 @@ security:
 ```
 
 ### Step 3: Validate Against Use Cases
-
-Claude walks through 5–10 scenarios:
+Walk 5–10 concrete scenarios — happy path, every error in the taxonomy, and pagination:
 ```
-Scenario 1: "Create new user"
-  Request: POST /v1/users { "email": "...", "name": "..." }
-  Response: 201 { "id": "usr_123", "email": "...", "created_at": "..." }
+Scenario 1 — Create new user
+  Request:  POST /v1/users { "email": "new@example.com", "name": "..." }
+  Response: 201 { "id": "usr_123", "email": "new@example.com", "created_at": "..." }
 
-Scenario 2: "Email already exists"
-  Request: POST /v1/users { "email": "[existing@example.com](mailto:existing@example.com)" }
+Scenario 2 — Email already exists
+  Request:  POST /v1/users { "email": "existing@example.com" }
   Response: 400 { "error_code": "EMAIL_ALREADY_EXISTS", "message": "..." }
 
+Scenario 3 — Rate limited
+  Response: 429 { "error_code": "RATE_LIMITED" } + X-RateLimit-Remaining: 0
 ...
 ```
 
 ### Step 4: PM Approval
-
-PM reviews:
-- [ ] Errors are well-defined (error_code + message)
+- [ ] Errors are well-defined (error_code + message + request_id)
 - [ ] Pagination strategy is clear (if applicable)
 - [ ] Versioning path is explicit
-- [ ] Backwards compatibility promise is documented
+- [ ] Backwards-compatibility promise is documented
 
 ## Handoff (Next in the SDLC Chain)
+Once the contract is approved, always run **security-baseline** next — before any implementation — to validate PII handling, secrets, auth/authz, compliance scope, and dependency CVEs against the contract you just defined.
 
-Once the API contract is approved by the PM, always run the **security-baseline** skill next — before any implementation begins — to validate PII handling, secrets management, auth/authz, compliance scope, and dependency CVEs against the contract you just defined.
+> "API contract locked. Before we write a line of implementation, I'm running the Security Baseline to make sure these endpoints handle PII and auth correctly."
 
-Tell the user the skill is firing and why, e.g.:
-> "API contract locked. Before we write a line of implementation, I am running the Security Baseline to make sure the endpoints we just specified handle PII and auth correctly."
+## Anti-Patterns
+- ❌ Designing the contract after the code exists → ✅ contract first, code to the contract
+- ❌ Unversioned endpoints → ✅ explicit version path + deprecation policy from day one
+- ❌ Free-text error strings → ✅ machine-readable `error_code` + human `message` + `request_id`
+- ❌ Pagination "we'll add when it's slow" → ✅ decided up front for any list endpoint
+- ❌ Validating only the happy path → ✅ a scenario for every error in the taxonomy
+- ❌ Silent breaking changes → ✅ a documented backwards-compatibility promise consumers can rely on
