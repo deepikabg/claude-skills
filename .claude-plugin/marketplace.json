@@ -10,7 +10,7 @@
   "plugins": [
     {
       "name": "pm-gates",
-      "description": "Seven principal-PM gates that run across a build's lifecycle: brainstorm, eval-spec, architecture-checkpoint, api-contract-definition, eval-integration-gate, security-baseline, and deploy-gate.",
+      "description": "Six principal-PM gates that run across a build's lifecycle: brainstorm, eval-spec, architecture-checkpoint, api-contract-definition, security-baseline, and deploy-gate.",
       "source": "./",
       "strict": false,
       "skills": [
@@ -18,7 +18,6 @@
         "./eval-spec",
         "./architecture-checkpoint",
         "./api-contract-definition",
-        "./eval-integration-gate",
         "./security-baseline",
         "./deploy-gate"
       ]
