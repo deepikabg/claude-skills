@@ -32,6 +32,7 @@ Match the rigor to the stakes — don't make a weekend project file a cost model
 5. **Observability** — what must be instrumented?
 6. **Cost** — cloud spend estimate
 7. **Eval loop (AI-native only)** — is the eval/feedback service a first-class component? (see Intake)
+8. **AI-native runtime (AI-native only)** — token cost (usually the dominant line), latency variance, model-failure fallback, version pinning, idempotent retries
 
 ## Workflow
 
@@ -61,17 +62,21 @@ Before proposing architecture, get:
 - Schema: [key tables + rationale]
 - Caching: [strategy, if needed]
 - Consistency model: [immediate/eventual + when each]
+- Trust boundaries & tenancy: [where PII lives; how tenants are isolated — e.g., RLS]
 
 ### Scalability
-- Current: [P95 latency at 1k req/sec]
-- Bottleneck: [where does it break?]
+- Current: [P50/P95/P99 latency at target req/sec — name the workload shape, read/write ratio]
+- Statefulness: [stateless services + externalized state? what holds session/memory?]
+- Bottleneck: [where does it break — compute, DB, or model throughput?]
 - Scaling trigger: [throughput at which to split services]
 - Timeline to re-architect: [if constraints change]
 
 ### Failure Modes
 - Database down: [degradation mode]
 - External API timeout: [fallback]
+- **Model API timeout / outage (AI-native):** [fallback — cached response, smaller/cheaper model, queue, or graceful refusal]
 - Rate limit hit: [queue strategy]
+- Retries: [exponential backoff + idempotent ("safe-to-retry") operations so retries don't double-charge/double-write]
 - Observability: [what you must track]
 
 ### Eval / Feedback Service  (AI-native only)
@@ -80,8 +85,15 @@ Before proposing architecture, get:
 - Live metrics: [what's on the dashboard]
 (Must match the runtime eval loop specified in the Eval Spec, Step 7.)
 
+### AI-Native Runtime  (AI-native only)
+- Model + version pinning: [which model; how prompt/model versions are pinned and rolled]
+- Latency budget: [P50/P99 of the model call — LLM calls are the slowest, highest-variance hop]
+- Token-cost control: [prefix/context caching; smaller models for routine steps; prompt/context compaction; batching]
+- Provisioned throughput vs. scale-to-zero: [for latency-critical vs. bursty workloads]
+
 ### Cost Estimate
-- Compute: $[X]/month (baseline) · Database: $[X]/month
+- **AI-native: token cost per request × volume is usually the dominant line — model it first**, before compute.
+- Compute: $[X]/month (baseline) · Database: $[X]/month · Tokens: $[X]/month (cost per request × volume)
 - At 10x throughput: $[Y]/month · Scaling cliff: [is there one?]
 
 ### Alternatives Considered
@@ -124,6 +136,8 @@ Flag and re-propose if the design:
 - ✗ Is missing the throughput calc
 - ✗ Violates the stated constraint (e.g., microservices for a 2-person startup)
 - ✗ Is AI-native but has **no eval/feedback service** in the design
+- ✗ Is AI-native but has **no token-cost estimate** or **no model-failure fallback**
+- ✗ Has retried/async operations that aren't **idempotent** (double-charge / double-write risk)
 
 ## Success Metrics (is this skill earning trust?)
 - [ ] Approval rate: 80%+ approved without major changes
@@ -151,4 +165,7 @@ Tell the user which skill is firing next and why, e.g.:
 - ❌ Hidden assumptions → ✅ surfaced in "Open Assumptions" with "what if wrong?"
 - ❌ Microservices for a 2-person startup → ✅ rigor scaled to constraint (start simple, name the scaling trigger)
 - ❌ AI-native design with evals "added later" → ✅ eval/feedback service is first-class, per the eval spec
+- ❌ Costing servers while ignoring tokens → ✅ token cost modeled first; caching + right-sized models named
+- ❌ Assuming the model API is always up and fast → ✅ fallback + a P99 latency budget for the model hop
+- ❌ Retries with no idempotency → ✅ safe-to-retry operations (idempotency keys / dedupe)
 - ❌ "It'll scale fine" → ✅ a stated bottleneck and the throughput at which it breaks
