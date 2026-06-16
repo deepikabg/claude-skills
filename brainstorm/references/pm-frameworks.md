@@ -1,8 +1,8 @@
 # PM Frameworks Reference (Brainstorm v2)
 
-Distilled from the user's own PM docs (RAG: "Product Design frameworks and to dos," "Frameworks for thinking/strategy/Problem Solving," "Strategy, business model, monetization," "Validating product ideas," "PM Interview - Metrics," Gibson Biddle exercises). This is *her* method, not generic PM theory.
+A working PM toolkit for the brainstorm gate — strategy structures, prioritization tools, and scoping lenses. Pragmatic, applied, not academic. Draws on widely-used frameworks (cited inline) assembled into one discovery loop.
 
-## 1. The structured discovery flow (her core loop)
+## 1. The structured discovery flow (the core loop)
 Ask clarifying questions → goal & metrics → user persona → painpoints (break down 3) → brainstorm solutions widely → pros/cons → prioritize → measure of success → conclude → GTM → user stories. Never answer casually without structure. Talk through your reasoning out loud, even when stuck.
 
 **GOLD rule:** At the problem stage: understand needs, desires, emotions, barriers, goals; map user flow → painpoints → prioritize by goal. Stay in the problem space; don't give away the solution.
@@ -13,7 +13,7 @@ Narrow scope before solving. Give a heads-up on assumptions. Company (mission, g
 For strategy questions: list evaluation criteria (UX, revenue, execution, effort, confidence), evaluate each choice across opportunity size, cost (impl + marketing), mission/ecosystem fit, UX, finance, operations; recommend and summarize.
 
 ## 3. The "three components that matter most"
-Before solutions, name the 2–3 things that most determine success. Her example: apartment-hunting app → (1) business model [two-sided marketplace], (2) competition, (3) user segment. Force this early so the brainstorm targets what actually decides the outcome.
+Before solutions, name the 2–3 things that most determine success. Example: apartment-hunting app → (1) business model [two-sided marketplace], (2) competition, (3) user segment. Force this early so the brainstorm targets what actually decides the outcome.
 
 ## 4. Problem prioritization
 - **Customer Problems Stack Rank** (B2B/SaaS): it isn't enough that you solve a problem — you must know *where it ranks* for the customer.
@@ -21,7 +21,7 @@ Before solutions, name the 2–3 things that most determine success. Her example
 - **The "only one" forcing question:** if you could fix only one this month, which unlocks most — and articulate why #1–3 are materially more important than #4–5.
 - **Alternatives:** what people do today instead.
 
-## 5. Frequency lens (the user's key scoping insight)
+## 5. Frequency lens (the key scoping insight)
 How often does each use case fire? Daily/high-freq → real infrastructure, the product lives here. Weekly/monthly → scheduled task/routine, keep light. One-time/rare → script, manual step, or do by hand; **building a system here is over-engineering.** Frequency determines whether automation is justified at all. Pair with risk: high-frequency × high-risk decisions earn real building.
 
 ## 6. Prioritization tools
@@ -39,7 +39,7 @@ For agents/RAG/probabilistic systems, problem definition includes mapping decisi
 - **Aggregator vs. Platform** (Bill Gates Line): platforms facilitate 3rd-party↔user relationships; aggregators intermediate and control them.
 - Good-idea test: can you articulate why most people think it's a bad idea, but you see what makes it good? Look for a leading edge of change that unlocks an opportunity.
 
-## 9. Validating cheaply (Lean — her assumption-test ladder)
+## 9. Validating cheaply (Lean assumption-test ladder)
 Build → Measure → Learn. The cheaper/faster/easier circle: each person proposes a leaner test than the last; stop when no cheaper idea has learning value. Test ideas: landing page, paper prototype, ad (Google/FB), manual version of the service, social post, interviews, fake-the-feature. Plan: define metric + what validates/invalidates the assumption before running. Pitfall to avoid: confirmation bias, fear of failure.
 
 ## 10. Metrics
