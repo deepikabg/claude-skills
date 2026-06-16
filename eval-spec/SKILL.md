@@ -75,6 +75,18 @@ Global averages hide segment failures. For each eval, define slices by the sensi
 - **Tie thresholds to HITL level by risk:** high-risk → human approves (and for high-stakes tool calls, an interruption/approval step before execution); medium → AI acts, humans sample + handle escalations; low → AI acts with monitoring.
 - **Instrumentation to spec now** (so it's built in, not bolted on): online metrics (acceptance/override rates, per-segment performance, error rates), offline (eval scores, calibration, drift), and the incident→eval-case flow. New systems: re-run error analysis weekly until patterns stabilize; mature: monthly + after every incident/complaint-spike/drift.
 
+### Step 7 — Specify the runtime eval loop (build it in, don't bolt it on)
+
+The spec above defines *what* to measure. This step defines the *living system* that measures it in production — so the architecture treats evals as a first-class component, not a post-hoc script. For AI-native systems (RAG, agents, agentic commerce), specify these now; `architecture-checkpoint` then verifies they're actually in the design.
+
+- **Eval service (not a script).** Specify it as a real component: input = the system output to evaluate; output = score + error category + confidence; where it runs = inline / async / batch; max acceptable latency. "We'll run a notebook later" is the failure this prevents.
+- **Feedback loop (closed, not aspirational).** Where do human corrections enter (UI/API)? How are they stored (schema)? How are they categorized (reuse the failure taxonomy from Step 2)? And the cadence by which corrections become prompt/data/model updates. A feedback loop with no path back to the system is just logging.
+- **Live dashboard (not an offline report).** Eval score over time (trending up?), error categories (are the most common ones shrinking?), feedback velocity, and per-segment performance against threshold. If the only time anyone sees eval numbers is in a quarterly deck, the loop isn't running.
+- **Runtime guardrails.** Score threshold → escalate to human below it; confidence threshold → auto-approve above it, else route to human; anomaly detection → alert if eval score drops week-over-week beyond a set delta.
+- **Loop failure modes.** Eval service down → fallback behavior? Feedback queue full → drop or buffer? No ground truth available → how is correctness measured at all?
+
+**Gate check:** the eval loop is specified as buildable architecture (service + feedback path + dashboard + guardrails), tied to the gold set and taxonomy above — ready for `architecture-checkpoint` to design in.
+
 ---
 
 ## Output: The Eval Spec
@@ -119,13 +131,20 @@ For each:
 - Online/offline metrics + incident→eval-case flow: [...]
 - Error-analysis cadence: [weekly until stable → monthly]
 
-## → Feeds: architecture-checkpoint (eval/feedback service) + eval-integration-gate (runtime loops)
+## Runtime Eval Loop (architecture must build this)
+- Eval service: [input / output / inline-async-batch / latency]
+- Feedback loop: [correction UI/API → storage → taxonomy → update cadence]
+- Dashboard: [score-over-time / error categories / feedback velocity / per-segment]
+- Runtime guardrails: [score & confidence thresholds, anomaly alert]
+- Loop failure modes: [service down / queue full / no ground truth]
+
+## → Feeds: architecture-checkpoint (must build the eval/feedback service as a first-class component)
 ```
 
 ## Handoff
 
-The Eval Spec is a primary input to **architecture-checkpoint** (the eval/feedback service must be designed in, per the architecture checklist) and to **eval-integration-gate** (which ensures the runtime loop is built to produce these measurements). Say:
-> "Eval spec is locked — every feature classified, failure taxonomy built from error analysis, gold set defined, thresholds set. This now feeds Architecture so the eval/feedback service is designed in, not bolted on."
+The Eval Spec is a primary input to **architecture-checkpoint**: the runtime eval loop specified in Step 7 (eval service + feedback path + dashboard + guardrails) must be designed in as a first-class component, not bolted on later. Say:
+> "Eval spec is locked — every feature classified, failure taxonomy built from error analysis, gold set defined, thresholds set, and the runtime eval loop specified. This now feeds Architecture so the eval/feedback service is designed in, not bolted on."
 
 ## Anti-Patterns
 - ❌ Top-down generic metrics (latency, token count) as your evals → ✅ error-analysis-first, derived from real failures
