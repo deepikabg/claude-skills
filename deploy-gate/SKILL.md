@@ -67,7 +67,7 @@ Design-time checked the *chosen* deps; this checks the *resolved tree*:
 For each irreversible action about to run, present it explicitly and wait for a human "yes":
 
 ```
-�con DEPLOY GATE — irreversible action requires your approval:
+⛔ DEPLOY GATE — irreversible action requires your approval:
 
 Action:        [e.g., supabase db push → PRODUCTION]
 Target:        [project / environment / URL]
